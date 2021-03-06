@@ -26,6 +26,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import udit.android.nasaimagegallery.Adapter.GalleryAdapter;
+import udit.android.nasaimagegallery.FullScreenImage.FullScreenFragment;
 import udit.android.nasaimagegallery.Model.Data;
 import udit.android.nasaimagegallery.R;
 
@@ -38,6 +39,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityViewI
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+
         if (Build.VERSION.SDK_INT >= 19 && Build.VERSION.SDK_INT < 21) {
             setWindowFlag(this, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, true);
         }
@@ -49,9 +53,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityViewI
             setWindowFlag(this, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, false);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
         init();
+
     }
 
     public static void setWindowFlag(Activity activity, final int bits, boolean on) {
@@ -97,8 +100,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityViewI
         rvGalleryThumbnails.addOnItemTouchListener(new GalleryAdapter.RecyclerTouchListener(getApplicationContext(), rvGalleryThumbnails, new GalleryAdapter.ClickListener() {
             @Override
             public void onClick(View view, int position) {
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("images", (Serializable) data);
+                bundle.putInt("position", position);
 
-
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                FullScreenFragment newFragment = FullScreenFragment.newInstance();
+                newFragment.setArguments(bundle);
+                newFragment.show(ft, "slideshow");
             }
         }));
     }
