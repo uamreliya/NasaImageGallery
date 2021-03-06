@@ -12,4 +12,23 @@
         android:layout_centerInParent="true"
         android:scaleType="fitCenter" />
 
+    <ImageView
+        android:id="@+id/iv_up_arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/tv_swipe_up"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/ic_baseline_keyboard_arrow_up_24" />
+
+    <TextView
+        android:id="@+id/tv_swipe_up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:text="Swipe up"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_12sdp" />
+
 </RelativeLayout>

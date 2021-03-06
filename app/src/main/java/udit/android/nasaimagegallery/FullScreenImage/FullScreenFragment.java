@@ -19,6 +19,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import udit.android.nasaimagegallery.Adapter.MyViewPagerAdapter;
 import udit.android.nasaimagegallery.Model.Data;
 import udit.android.nasaimagegallery.R;
 
