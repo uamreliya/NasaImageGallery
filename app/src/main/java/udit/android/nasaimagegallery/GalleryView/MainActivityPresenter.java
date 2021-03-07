@@ -8,6 +8,11 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import udit.android.nasaimagegallery.Model.Data;
@@ -37,6 +42,22 @@ public class MainActivityPresenter implements MainActivityPresenterInterface {
             Gson gson = gsonBuilder.create();
             List<Data> imageDataList = gson.fromJson(jsonFile, new TypeToken<List<Data>>() {
             }.getType());
+
+            Collections.sort(imageDataList, new Comparator<Data>() {
+
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+                @Override
+                public int compare(Data data, Data t1) {
+                    try {
+                        return dateFormat.parse(data.getDate()).compareTo(dateFormat.parse(t1.getDate()));
+                    } catch (ParseException e) {
+                        throw new IllegalArgumentException(e);
+                    }
+                }
+            });
+            Collections.reverse(imageDataList);
+
             mainActivityViewInterface.setJSONData(imageDataList);
         } catch (IOException e) {
             e.printStackTrace();

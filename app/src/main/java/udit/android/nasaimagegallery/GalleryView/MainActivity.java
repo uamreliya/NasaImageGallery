@@ -1,14 +1,19 @@
 package udit.android.nasaimagegallery.GalleryView;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.IntentFilter;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -23,24 +28,23 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import udit.android.nasaimagegallery.Adapter.GalleryAdapter;
 import udit.android.nasaimagegallery.FullScreenImage.FullScreenFragment;
 import udit.android.nasaimagegallery.Model.Data;
 import udit.android.nasaimagegallery.R;
+import udit.android.nasaimagegallery.Util.NetworkState;
 
 public class MainActivity extends AppCompatActivity implements MainActivityViewInterface {
 
     MainActivityPresenter mainActivityPresenter;
-    @BindView(R.id.rv_gallery_thumbnails)
-    RecyclerView rvGalleryThumbnails;
+    static RecyclerView rvGalleryThumbnails;
+    NetworkState networkState;
+    static LinearLayout networkErrorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
 
         if (Build.VERSION.SDK_INT >= 19 && Build.VERSION.SDK_INT < 21) {
             setWindowFlag(this, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, true);
@@ -69,7 +73,15 @@ public class MainActivity extends AppCompatActivity implements MainActivityViewI
     }
 
     private void init() {
+
+        rvGalleryThumbnails = findViewById(R.id.rv_gallery_thumbnails);
+        networkErrorLayout = findViewById(R.id.network_error_layout);
+
+        networkState = new NetworkState();
+
+        registerReceiver(networkState, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         mainActivityPresenter = new MainActivityPresenter(this, this);
+
         mainActivityPresenter.getJSONData();
 
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 2);
@@ -77,22 +89,19 @@ public class MainActivity extends AppCompatActivity implements MainActivityViewI
         rvGalleryThumbnails.setItemAnimator(new DefaultItemAnimator());
     }
 
+    public static void networkError(boolean val) {
+        if (val) {
+            networkErrorLayout.setVisibility(View.GONE);
+            rvGalleryThumbnails.setVisibility(View.VISIBLE);
+        } else {
+            networkErrorLayout.setVisibility(View.VISIBLE);
+            rvGalleryThumbnails.setVisibility(View.GONE);
+        }
+    }
+
+    @SuppressLint("SimpleDateFormat")
     @Override
     public void setJSONData(List<Data> data) {
-
-        Collections.sort(data, new Comparator<Data>() {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-            @Override
-            public int compare(Data data, Data t1) {
-                try {
-                    return dateFormat.parse(data.getDate()).compareTo(dateFormat.parse(t1.getDate()));
-                } catch (ParseException e) {
-                    throw new IllegalArgumentException(e);
-                }
-            }
-        });
-        Collections.reverse(data);
 
         GalleryAdapter galleryAdapter = new GalleryAdapter(data);
         rvGalleryThumbnails.setAdapter(galleryAdapter);
@@ -115,5 +124,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityViewI
     @Override
     public void readJSONFileError(String error) {
         Toast.makeText(this, "Something went wrong!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(networkState);
     }
 }
